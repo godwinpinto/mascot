@@ -13,12 +13,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       theme={{
         globalStyles: (_theme) => ({
           body: {
-            width: "80vw",
-            height: "80vh",
+            width: "100vw",
+            height: "100vh",
           },
           "#root": {
-            width: "80%",
-            height: "80%",
+            width: "100%",
+            height: "100%",
           },
         }),
       }}
