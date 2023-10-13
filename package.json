@@ -15,7 +15,7 @@
     "@emotion/react": "^11.10.5",
     "@mantine/core": "^5.8.3",
     "@mantine/hooks": "^5.8.3",
-    "@react-three/drei": "^9.43.3",
+    "@react-three/drei": "^9.86.0",
     "@react-three/fiber": "^8.9.1",
     "three": "^0.146.0"
   },
