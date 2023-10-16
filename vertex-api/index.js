@@ -7,7 +7,7 @@ app.use(express.json())
 
 var token = ''
 
-setInterval
+
 
 app.get('/',
     (req, res) => res.send('Dockerizing Node Application'))
@@ -28,6 +28,21 @@ app.get('/get-google-token', async (req, res) => {
 
 
 
+const renewAccessToken = async () => {
+    try {
+        const response = await axios.get('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', {
+            headers: {
+                'Metadata-Flavor': 'Google'
+            }
+        });
+        token = response.data.access_token
+    } catch (error) {
+
+    }
+}
+
+renewAccessToken();
+
 app.get('/get-existing-token', async (req, res) => {
 
     const response = { "access_token": token }
@@ -37,7 +52,7 @@ app.get('/get-existing-token', async (req, res) => {
 
 
 
-const instances=[
+var instances = [
     {
         "context": `You are a restaurant waiter attending customers and giving them all possible dishes which match criteria.
 
@@ -158,100 +173,62 @@ Answer: {\"response\":\"bot response\", options:[ID],\"command\":\"OPTIONAL_VALU
             }
         ],
         "messages": [
-            {
-                "author": "user",
-                "content": "hello"
-            },
-            {
-                "content": " Hi there! How can I help you today? ",
-                "author": "bot",
-                "citationMetadata": {
-                    "citations": []
-                }
-            },
-            {
-                "author": "user",
-                "content": "what do you have in soup"
-            },
-            {
-                "content": " {\"response\":\"We have a variety of soups available, including Veg Manchow Soup, Veg Hot & Sour Soup, Chicken Hot & Sour Soup, Chicken Manchow Soup, and Prawns Hot & Sour Soup.\", options:[1,2,3,4,5], \"command\":\"suggest\"}",
-                "author": "bot",
-                "citationMetadata": {
-                    "citations": []
-                }
-            },
-            {
-                "author": "user",
-                "content": "can you get me Prawns Hot & Sour Soup"
-            },
-            {
-                "author": "bot",
-                "content": " {\"response\":\"Ok i have placed the order for Prawns Hot & Sour Soup\", options:[5], \"command\":\"order\"}",
-                "citationMetadata": {
-                    "citations": []
-                }
-            },
-            {
-                "author": "user",
-                "content": "do you have biryani"
-            },
-            {
-                "content": " {\"response\":\"Sorry, we don't have biryani on the menu. Would you like to order something else?\", options:[], \"command\":\"NA\"}",
-                "author": "bot",
-                "citationMetadata": {
-                    "citations": []
-                }
-            },
-            {
-                "author": "user",
-                "content": "what else"
-            },
-            {
-                "content": " {\"response\":\"We have a variety of other dishes available, including Appetizers, Kung Pao Potato, Veg Wonton, and Tofu Sriracha.\", options:[6,7,8,9,10], \"command\":\"suggest\"}",
-                "author": "bot",
-                "citationMetadata": {
-                    "citations": []
-                }
-            },
-            {
-                "author": "user",
-                "content": "ok i ll take kung pao potato"
-            }
-        ]}
-    ]
 
-
-    const parameters= {
-        "candidateCount": 1,
-        "maxOutputTokens": 1024,
-        "temperature": 0.2,
-        "topP": 0.8,
-        "topK": 40
+        ]
     }
+]
 
 
-    const API_ENDPOINT = "us-central1-aiplatform.googleapis.com";
+const parameters = {
+    "candidateCount": 1,
+    "maxOutputTokens": 1024,
+    "temperature": 0.2,
+    "topP": 0.8,
+    "topK": 40
+}
+
+
+const API_ENDPOINT = "us-central1-aiplatform.googleapis.com";
 const PROJECT_ID = "fresh-park-401008";
 const MODEL_ID = "chat-bison";
 
 app.post('/predict', async (req, res) => {
+
+    const { user_messages } = req.body;
+
+    instances.messages.push(...user_messages)
     try {
-      const response = await axios.post(`https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/us-central1/publishers/google/models/${MODEL_ID}:predict`, {
-        "instances": instances,
-        "parameters": parameters
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+        const response = await axios.post(`https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/us-central1/publishers/google/models/${MODEL_ID}:predict`, {
+            "instances": instances,
+            "parameters": parameters
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        try {
+            const contentValue = jsonData.predictions[0].candidates[0].content;
+            const message = {
+                text: contentValue
+            }
+            res.json(message);
+        } catch (e) {
+            const message = {
+                text: "Sorry, I din't get that"
+            }
+            res.json(message);
         }
-      });
-  
-      res.json(response.data);
+
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+        renewAccessToken();
+        console.error(error);
+        const message = {
+            text: "Sorry, I din't get that..."
+        }
+        res.json(message);
     }
-  });
+});
 
 app.listen(80,
     () => console.log(`⚡️[bootup]: Server is running at port: 80`));
