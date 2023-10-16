@@ -1,4 +1,4 @@
-const express = require('express'), 
+const express = require('express')
 const axios = require('axios')
 app = express(); 
   
@@ -23,4 +23,4 @@ app.get('/',
   });
   
 app.listen(80,  
-   () => console.log(`⚡️[bootup]: Server is running at port: 5000`));
+   () => console.log(`⚡️[bootup]: Server is running at port: 80`));
