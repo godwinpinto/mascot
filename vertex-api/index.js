@@ -208,12 +208,13 @@ app.post('/predict', async (req, res) => {
             }
         });
         try {
-            const contentValue = jsonData.predictions[0].candidates[0].content;
+            const contentValue = response.data.predictions[0].candidates[0].content;
             const message = {
                 text: contentValue
             }
             res.json(message);
         } catch (e) {
+            console.error(e);
             const message = {
                 text: "Sorry, I din't get that"
             }
