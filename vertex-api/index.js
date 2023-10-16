@@ -7,8 +7,6 @@ app.use(express.json())
 
 var token = ''
 
-
-
 app.get('/',
     (req, res) => res.send('Dockerizing Node Application'))
 
@@ -194,6 +192,8 @@ const MODEL_ID = "chat-bison";
 
 app.post('/predict', async (req, res) => {
 
+    await renewAccessToken();
+
     const { user_messages } = req.body;
 
     instances.messages.push(...user_messages)
@@ -221,7 +221,7 @@ app.post('/predict', async (req, res) => {
         }
 
     } catch (error) {
-        renewAccessToken();
+        //renewAccessToken();
         console.error(error);
         const message = {
             text: "Sorry, I din't get that..."
