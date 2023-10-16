@@ -78,7 +78,7 @@ Question: What is available in soup
 Answer: {\"response\":\"bot response\", options:[ID],\"command\":\"OPTIONAL_VALUEl\"}
 
 `,
-        "examples": [
+        examples: [
             {
                 "input": {
                     "author": "user",
@@ -170,7 +170,7 @@ Answer: {\"response\":\"bot response\", options:[ID],\"command\":\"OPTIONAL_VALU
                 }
             }
         ],
-        "messages": [
+        messages: [
 
         ]
     }
@@ -196,7 +196,7 @@ app.post('/predict', async (req, res) => {
 
     const { user_messages } = req.body;
 
-    instances.messages.push(...user_messages)
+    instances[0].messages.push(...user_messages)
     try {
         const response = await axios.post(`https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/us-central1/publishers/google/models/${MODEL_ID}:predict`, {
             "instances": instances,
